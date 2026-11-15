@@ -11,6 +11,7 @@ export async function seed(db, { orderCount = 60000 } = {}) {
   if ((await products.countDocuments()) === 0) await products.insertMany(catalog());
 
   const orders = db.collection("orders");
+  await orders.createIndex({ createdAt: 1 });
   if ((await orders.countDocuments()) === 0) {
     const day = 24 * 3600 * 1000;
     for (let batchStart = 0; batchStart < orderCount; batchStart += 5000) {
