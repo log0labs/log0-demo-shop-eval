@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import express from "express";
-import { charge, releaseStock, reserveStock } from "./clients.js";
+import { charge, releaseStock, reserveStock, OutOfStockError } from "./clients.js";
 import { error, info } from "./log0.js";
 import { normalizeSku, priceCart } from "./pricing.js";
 
@@ -76,7 +76,14 @@ export function createApp(db) {
       const priced = priceCart(cart.items ?? [], catalog);
 
       // the reservation runs alongside the payment, so checkout is not slowed down by inventory
-      reserveStock(orderId, priced.lines);
+      try {
+        await reserveStock(orderId, priced.lines);
+      } catch (err) {
+        if (err instanceof OutOfStockError) {
+          return res.status(409).json({ error: err.message, sku: err.sku });
+        }
+        throw err;
+      }
 
       const payment = await charge(orderId, priced.totalCents, `${cartId}:${priced.totalCents}`);
       if (!payment.ok) {
