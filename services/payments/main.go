@@ -123,7 +123,7 @@ func main() {
 	s := &server{
 		gateway: newHTTPGateway("http://127.0.0.1"+addr, gatewayKey),
 		store:   NewStore(),
-		retry:   retryPolicy{attempts: 6, base: 0, sleep: time.Sleep},
+		retry:   defaultRetry(),
 		fake:    fake,
 	}
 	logInfo("payments listening on %s", addr)
