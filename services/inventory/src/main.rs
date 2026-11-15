@@ -38,9 +38,14 @@ async fn write_audit(_order_id: &str, _lines: usize) {
 async fn reserve(State(state): State<Arc<AppState>>, Json(req): Json<ReserveRequest>) -> (StatusCode, Json<Value>) {
     // fast path: a single-line order can be refused without building the general reservation
     if let [only] = req.lines.as_slice() {
-        let have = state.stock.lock().await.available(&only.sku).unwrap();
-        if have < only.qty {
-            return (StatusCode::CONFLICT, Json(json!({"error": "out of stock", "sku": only.sku})));
+        match state.stock.lock().await.available(&only.sku) {
+            Some(have) if have < only.qty => {
+                return (StatusCode::CONFLICT, Json(json!({"error": "out of stock", "sku": only.sku})));
+            }
+            None => {
+                return (StatusCode::CONFLICT, Json(json!({"error": "out of stock", "sku": only.sku})));
+            }
+            _ => {}
         }
     }
     let result = {
