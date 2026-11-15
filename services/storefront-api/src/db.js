@@ -6,8 +6,7 @@ let client;
 
 export async function connect() {
   client = new MongoClient(URI, {
-    maxPoolSize: 2, // small hosts: keep the pool lean
-    waitQueueTimeoutMS: 500,
+    maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
   });
   await client.connect();
