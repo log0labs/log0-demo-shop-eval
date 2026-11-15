@@ -121,7 +121,7 @@ func main() {
 	fake := newFakeGateway(env("FAKE_GATEWAY_EXPECTED_KEY", "sk_live_demo_0123456789abcdef"))
 	s := &server{
 		gateway: newHTTPGateway("http://127.0.0.1"+addr, gatewayKey),
-		store:   &Store{},
+		store:   NewStore(),
 		retry:   defaultRetry(),
 		fake:    fake,
 	}
